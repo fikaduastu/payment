@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "Stripe.apiKey",
+      "type": "java.lang.String",
+      "description": "Description for Stripe.apiKey."
+  }
+] }
