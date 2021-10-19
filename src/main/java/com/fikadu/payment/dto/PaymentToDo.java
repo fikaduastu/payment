@@ -9,5 +9,5 @@ import java.util.Map;
 @AllArgsConstructor
 public class PaymentToDo {
     private Order order;
-    private Map<String, Double> paymentToMake;
+    private Map<String, Long> paymentToMake;
 }

@@ -1,6 +1,7 @@
 package com.fikadu.payment.service;
 
 import com.fikadu.payment.dto.PaymentToDo;
+import com.fikadu.payment.dto.PaymentToDoStatus;
 import com.fikadu.payment.entity.Payment;
 import com.fikadu.payment.repository.PaymentRepository;
 import com.stripe.exception.StripeException;
@@ -25,8 +26,13 @@ public class PaymentService {
     @Autowired
     Payment payment;
 
+    @Autowired
+    Producer producer;
+
     @Value("${stripe.key}")
-    private String stripePublicKey;
+    String stripePublicKey;
+
+
 
 
     public void createCustomer(PaymentToDo payment) throws StripeException {
@@ -44,22 +50,22 @@ public class PaymentService {
         }
         else {
 
-            Map<String,Object> customerParam = new HashMap<String,Object>();
+            Map<String,Object> customerParam = new HashMap<>();
             customerParam.put("email",email);
 
             Customer newCustomer = Customer.create(customerParam);
 
-            Map<String,Object> cardParam = new HashMap<String,Object>();
+            Map<String,Object> cardParam = new HashMap<>();
             cardParam.put("number",payment.getOrder().getPayment().getCardNumber());
             cardParam.put("exp_month",payment.getOrder().getPayment().getExpireMonth());
             cardParam.put("exp_year",payment.getOrder().getPayment().getExpireYear());
             cardParam.put("cvc",payment.getOrder().getPayment().getCcv());
 
-            Map<String,Object> tokenParam = new HashMap<String,Object>();
+            Map<String,Object> tokenParam = new HashMap<>();
             tokenParam.put("card",cardParam);
             Token token = Token.create(tokenParam);
 
-            Map<String,Object> source = new HashMap<String,Object>();
+            Map<String,Object> source = new HashMap<>();
             source.put("source",token.getId());
             newCustomer.getSources().create(source);
 
@@ -69,11 +75,12 @@ public class PaymentService {
 
     public void makePayment(Customer customer,PaymentToDo payment) throws StripeException {
 
-        Map<String,Object> chargeParam = new HashMap<String,Object>();
+        Map<String,Object> chargeParam = new HashMap<>();
         chargeParam.put("amount",payment.getPaymentToMake().get("totalPrice"));
         chargeParam.put("currency","usd");
         chargeParam.put("customer",customer.getId());
         Charge.create(chargeParam);
+        createPayment(payment);
     }
 
     public void createPayment(PaymentToDo paymentToDo){
@@ -91,6 +98,11 @@ public class PaymentService {
         payment.setPaymentStatusOfRD("UNPAID");
 
         paymentRepository.save(payment);
+
+        PaymentToDoStatus paymentToDoStatus = new PaymentToDoStatus();
+        paymentToDoStatus.setPaymentToDo(paymentToDo);
+        paymentToDoStatus.setStatus(payment.getPaymentStatusOfUser());
+        producer.publishPayment(paymentToDoStatus);
 
     }
 }

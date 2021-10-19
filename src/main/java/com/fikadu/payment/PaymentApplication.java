@@ -1,5 +1,6 @@
 package com.fikadu.payment;
 
+import com.fikadu.payment.dto.Food;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

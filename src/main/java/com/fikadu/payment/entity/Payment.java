@@ -21,9 +21,9 @@ public class Payment {
     private Long id;
     private Long userId;
     private Long orderId;
-    private Double totalCost;
-    private Double dasherPrice;
-    private Double restaurantPrice;
+    private Long totalCost;
+    private Long dasherPrice;
+    private Long restaurantPrice;
     private String email;
     private String userName;
     private String restaurantEmail;

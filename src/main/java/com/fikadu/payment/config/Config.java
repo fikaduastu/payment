@@ -1,16 +1,19 @@
 package com.fikadu.payment.config;
 
 import com.fikadu.payment.dto.PaymentToDo;
+import com.fikadu.payment.dto.PaymentToDoStatus;
 import com.fikadu.payment.entity.Payment;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +42,7 @@ public class Config {
         // put the group ID of consumer in the map
         map.put(ConsumerConfig
                         .GROUP_ID_CONFIG,
-                "id");
+                "myId");
         map.put(ConsumerConfig
                         .KEY_DESERIALIZER_CLASS_CONFIG,
                 StringDeserializer.class);
@@ -63,4 +66,21 @@ public class Config {
         factory.setConsumerFactory(paymentToDoConsumer());
         return factory;
     }
+
+
+    // this is for producer
+    @Bean
+    public ProducerFactory<String, PaymentToDoStatus> producerFactory() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
+
+    @Bean
+    public KafkaTemplate<String, PaymentToDoStatus> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
+    }
+
 }

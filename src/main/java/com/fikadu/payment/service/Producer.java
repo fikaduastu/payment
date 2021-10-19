@@ -1,12 +1,11 @@
 package com.fikadu.payment.service;
 
-import com.fikadu.payment.entity.Payment;
+import com.fikadu.payment.dto.Food;
+import com.fikadu.payment.dto.PaymentToDoStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class Producer {
@@ -15,18 +14,16 @@ public class Producer {
 
 
 
+    //    @Autowired
+//    private KafkaTemplate<String, PaymentToDoStatus> kafkaTemplate;
+//    private static final String TOPIC = "paymentStatus";
 
-    @Autowired
-    private KafkaTemplate<String, Payment> kafkaTemplate;
-    private static final String TOPIC = "doPayment";
+    public void publishPayment(PaymentToDoStatus paymentToDoStatus){
 
-    public void publishPayment(){
-        //kafkaTemplate.send(TOPIC,payment);
+       // kafkaTemplate.send(TOPIC,paymentToDoStatus);
+
     }
 
-    //produce objects for making payments for the restaurant and dasher
-
-    //produce objects for letting the notification that the payment is made
 
 
 }
