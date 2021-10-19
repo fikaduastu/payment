@@ -1,7 +1,6 @@
 package com.fikadu.payment.service;
 
 import com.fikadu.payment.dto.PaymentToDo;
-import com.fikadu.payment.entity.Payment;
 import com.stripe.exception.StripeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -16,7 +15,7 @@ public class Consumer {
     PaymentService paymentService;
 
     // this topic and groupId should be from the producer server
-    @KafkaListener(topics = "order", groupId = "myPaymentGroup")
+    @KafkaListener(id = "myId", topics = "order")
     public void consumeFromKafka(PaymentToDo payment) throws StripeException {
         paymentService.createCustomer(payment);
     }

@@ -13,25 +13,7 @@ public class Producer {
 
 
 
-    //produce objects for making payment for the order by customer
-     Payment payment = new Payment(
-             "1111222233334444",
-             "05",
-             "2024",
-             "123",
-             "customer1@email.com",
-             "32.45",
-             "12345",
-             "12344532",
-             "customer1",
-             "12.34",
-             "pizzaranch@email.com",
-             "4.56",
-             "dasher1@email.com",
-             "UNPAID",
-             "UNPAID"
 
-     );
 
 
     @Autowired
@@ -39,7 +21,7 @@ public class Producer {
     private static final String TOPIC = "doPayment";
 
     public void publishPayment(){
-        kafkaTemplate.send(TOPIC,payment);
+        //kafkaTemplate.send(TOPIC,payment);
     }
 
     //produce objects for making payments for the restaurant and dasher

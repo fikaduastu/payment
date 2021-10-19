@@ -22,6 +22,9 @@ public class PaymentService {
     @Autowired
     private PaymentRepository paymentRepository;
 
+    @Autowired
+    Payment payment;
+
     @Value("${stripe.key}")
     private String stripePublicKey;
 
@@ -37,18 +40,9 @@ public class PaymentService {
 
         if (customers.size() > 0) {
             customer = customers.get(0);
-            Map<String,Object> chargeParam = new HashMap<String,Object>();
-            // this is not right
-            chargeParam.put("amount",payment.getPaymentToMake().get());
-            chargeParam.put("currency","usd");
-            chargeParam.put("customer",customer.getId());
-
-            Charge.create(chargeParam);
-            // the person is already registered as a stripe customer so deduct the price
-
+            makePayment(customer,payment);
         }
         else {
-            //create a stripe customer with email and card information
 
             Map<String,Object> customerParam = new HashMap<String,Object>();
             customerParam.put("email",email);
@@ -69,19 +63,34 @@ public class PaymentService {
             source.put("source",token.getId());
             newCustomer.getSources().create(source);
 
-            // then deduct the amount
-
-            Map<String,Object> chargeParam = new HashMap<String,Object>();
-
-            // this is not right and NB the cost should be multiplied by 100
-            chargeParam.put("amount",payment.getPaymentToMake().get());
-            chargeParam.put("currency","usd");
-            chargeParam.put("customer",newCustomer.getId());
-
-            Charge.create(chargeParam);
+            makePayment(newCustomer,payment);
         }
+    }
 
+    public void makePayment(Customer customer,PaymentToDo payment) throws StripeException {
 
+        Map<String,Object> chargeParam = new HashMap<String,Object>();
+        chargeParam.put("amount",payment.getPaymentToMake().get("totalPrice"));
+        chargeParam.put("currency","usd");
+        chargeParam.put("customer",customer.getId());
+        Charge.create(chargeParam);
+    }
+
+    public void createPayment(PaymentToDo paymentToDo){
+
+        payment.setEmail(paymentToDo.getOrder().getUser().getEmail());
+        payment.setTotalCost(paymentToDo.getPaymentToMake().get("totalCost"));
+        payment.setRestaurantPrice(paymentToDo.getPaymentToMake().get("dasherPrice"));
+        payment.setDasherPrice(paymentToDo.getPaymentToMake().get("restaurantPrice"));
+        payment.setOrderId(paymentToDo.getOrder().getId());
+        payment.setUserId(paymentToDo.getOrder().getUser().getId());
+        payment.setUserName(paymentToDo.getOrder().getUser().getUserName());
+        payment.setRestaurantEmail(paymentToDo.getOrder().getRestaurant().getEmail());
+        payment.setDasherEmail(paymentToDo.getOrder().getDasher().getEmail());
+        payment.setPaymentStatusOfUser("PAID");
+        payment.setPaymentStatusOfRD("UNPAID");
+
+        paymentRepository.save(payment);
 
     }
 }

@@ -1,5 +1,6 @@
 package com.fikadu.payment.config;
 
+import com.fikadu.payment.dto.PaymentToDo;
 import com.fikadu.payment.entity.Payment;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -22,8 +23,8 @@ public class Config {
     // between Spring application
     // and Kafka server
     @Bean
-    public ConsumerFactory<String, Payment>
-    paymentConsumer()
+    public ConsumerFactory<String, PaymentToDo>
+    paymentToDoConsumer()
     {
 
         // HashMap to store the configurations
@@ -49,17 +50,17 @@ public class Config {
         // return message in JSON formate
         return new DefaultKafkaConsumerFactory<>(
                 map, new StringDeserializer(),
-                new JsonDeserializer<>(Payment.class));
+                new JsonDeserializer<>(PaymentToDo.class));
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String,Payment> paymentListner()
+    public ConcurrentKafkaListenerContainerFactory<String,PaymentToDo> paymentToDoListner()
     {
         ConcurrentKafkaListenerContainerFactory<String,
-                Payment>
+                PaymentToDo>
                 factory
                 = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(paymentConsumer());
+        factory.setConsumerFactory(paymentToDoConsumer());
         return factory;
     }
 }
