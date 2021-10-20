@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +34,6 @@ public class PaymentService {
 
     @Autowired
     Producer producer;
-
-
-
 
 
     @Value("${STRIPE_SECRET_KEY}")
@@ -95,28 +93,51 @@ public class PaymentService {
 
     public void makePayment(Customer customer,PaymentToDo payment) throws StripeException {
 
-//        Map<String,Object> chargeParam = new HashMap<>();
-//        chargeParam.put("amount",payment.getPaymentToMake().get("totalPrice"));
-//        chargeParam.put("currency","usd");
-//        chargeParam.put("customer",customer.getId());
-//        Charge.create(chargeParam);
-//        createPayment(payment);
+        String cardNumber = payment.getOrder().getPayment().getCardNumber();
+        String expirationMonth = payment.getOrder().getPayment().getExpireMonth();
+        String expirationYear = payment.getOrder().getPayment().getExpireYear();
+        String cvc = payment.getOrder().getPayment().getCcv();
 
-        PaymentIntentCreateParams params =
-                PaymentIntentCreateParams.builder()
-                        .setAmount(100L)
-                        .setCurrency("usd")
-                        .addPaymentMethodType("card")
-                        .build();
-        PaymentIntent paymentIntent = PaymentIntent.create(params);
 
-//        ChargeCreateParams chargeParams =
-//                ChargeCreateParams.builder()
-//                        .setAmount(payment.getPaymentToMake().get("totalPrice"))
-//                        .setCurrency("usd")
-//                        .setCustomer(customer.getId())
-//                        .build();
-//        Charge charge = Charge.create(chargeParams);
+        Map<String, Object> customerData = new HashMap<String, Object>();
+        customerData.put("number", cardNumber);
+        customerData.put("exp_month", expirationMonth);
+        customerData.put("exp_year", expirationYear);
+        customerData.put("cvc", cvc);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("card", customerData);
+        Token token = Token.create(params);
+
+        List<String> expandList = new ArrayList<>();
+        expandList.add("sources");
+
+        Map<String, Object> retrieveParams = new HashMap<>();
+        retrieveParams.put("expand", expandList);
+
+        Customer newCustomer =
+                Customer.retrieve(
+                        customer.getId(),
+                        retrieveParams,
+                        null
+                );
+        Map<String, Object> sourceParams = new HashMap<>();
+
+        sourceParams.put("source", token.getId());
+        newCustomer.getSources().create(sourceParams);
+
+        Map<String, Object> params1 = new HashMap<>();
+        params1.put("amount", 2000);
+        params1.put("currency", "usd");
+        params1.put("customer", newCustomer.getId());
+        params1.put(
+                "description",
+                "My First Test Charge (created for API docs)"
+        );
+
+        Charge charge = Charge.create(params1);
+
+
     }
 
     public void createPayment(PaymentToDo paymentToDo){
