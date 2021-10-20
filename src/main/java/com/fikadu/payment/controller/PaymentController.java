@@ -35,11 +35,11 @@ public class PaymentController {
         Payment payment = new Payment("4242424242424242","12","2022","112");
         Dasher dasher = new Dasher();
         Order order = new Order(123L,user,list,restaurant,payment,dasher);
-        Map<String,Long> map = new HashMap<>();
-        map.put("dasherPrice",Double.valueOf(2.45).longValue());
+        Map<String,Double> map = new HashMap<>();
+        /*map.put("dasherPrice",Double.valueOf(2.45).longValue());
         map.put("restaurantPrice",Double.valueOf(18).longValue());
         map.put("totalPrice",Double.valueOf(25).longValue());
-
+*/
         PaymentToDo paymentToDo = new PaymentToDo(order,map);
         paymentService.createCustomer(paymentToDo);
 

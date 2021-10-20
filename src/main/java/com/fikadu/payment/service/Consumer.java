@@ -1,5 +1,7 @@
 package com.fikadu.payment.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fikadu.payment.dto.PaymentToDo;
 import com.stripe.exception.StripeException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +15,17 @@ public class Consumer {
     @Autowired
     PaymentService paymentService;
 
+    ObjectMapper objectMapper=new ObjectMapper();
 
-    @KafkaListener(id = "myId", topics = "order")
-    public void consumeFromKafka(PaymentToDo payment) throws StripeException {
-        paymentService.createCustomer(payment);
+    @KafkaListener(topics = "order",id = "myId")
+    public void consumeFromKafka(String payment) {
+        System.out.println(payment);
+        PaymentToDo paymentToDo = null;
+        try {
+            paymentToDo = objectMapper.readValue(payment, PaymentToDo.class);
+            paymentService.createCustomer(paymentToDo);
+        } catch (JsonProcessingException | StripeException e) {
+            e.printStackTrace();
+        }
     }
 }

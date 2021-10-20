@@ -127,7 +127,8 @@ public class PaymentService {
         newCustomer.getSources().create(sourceParams);
 
         Map<String, Object> params1 = new HashMap<>();
-        params1.put("amount", 2000);
+        params1.put("amount", Double.valueOf(payment.getPaymentToMake().get("totalPayment") * 100).longValue());
+
         params1.put("currency", "usd");
         params1.put("customer", newCustomer.getId());
         params1.put(
@@ -144,9 +145,9 @@ public class PaymentService {
     public void createPayment(PaymentToDo paymentToDo){
 
         payment.setEmail(paymentToDo.getOrder().getUser().getEmail());
-        payment.setTotalCost(paymentToDo.getPaymentToMake().get("totalCost"));
-        payment.setRestaurantPrice(paymentToDo.getPaymentToMake().get("dasherPrice"));
-        payment.setDasherPrice(paymentToDo.getPaymentToMake().get("restaurantPrice"));
+        payment.setTotalCost(paymentToDo.getPaymentToMake().get("totalPayment"));
+        payment.setRestaurantPrice(paymentToDo.getPaymentToMake().get("restaurantPayment"));
+        payment.setDasherPrice(paymentToDo.getPaymentToMake().get("driverPrice"));
         payment.setOrderId(paymentToDo.getOrder().getId());
         payment.setUserId(paymentToDo.getOrder().getUser().getId());
         payment.setUserName(paymentToDo.getOrder().getUser().getUserName());
@@ -161,6 +162,8 @@ public class PaymentService {
         paymentToDoStatus.setPaymentToDo(paymentToDo);
         paymentToDoStatus.setStatus(payment.getPaymentStatusOfUser());
         producer.publishPayment(paymentToDoStatus);
+
+        // publish for gizachew as well
 
     }
 }

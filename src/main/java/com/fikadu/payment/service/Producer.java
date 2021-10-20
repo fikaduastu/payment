@@ -13,14 +13,19 @@ public class Producer {
 
 
     @Autowired
-    private KafkaTemplate<String, PaymentToDoStatus> kafkaTemplate;
+    private KafkaTemplate<String, Object> kafkaTemplateForPayment;
+
+
+
     private static final String TOPIC = "paymentStatus";
 
     public void publishPayment(PaymentToDoStatus paymentToDoStatus){
 
-        kafkaTemplate.send(TOPIC,paymentToDoStatus);
+        kafkaTemplateForPayment.send(TOPIC,paymentToDoStatus);
 
     }
+
+
 
 
 

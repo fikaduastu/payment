@@ -27,43 +27,30 @@ public class Config {
     // between Spring application
     // and Kafka server
     @Bean
-    public ConsumerFactory<String, PaymentToDo>
-    paymentToDoConsumer()
-    {
+    public ConsumerFactory<String, PaymentToDo> paymentToDoConsumer() {
 
         // HashMap to store the configurations
-        Map<String, Object> map
-                = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
 
         // put the host IP in the map
-        map.put(ConsumerConfig
-                        .BOOTSTRAP_SERVERS_CONFIG,
-                "127.0.0.1:9092");
+        map.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
 
         // put the group ID of consumer in the map
-        map.put(ConsumerConfig
-                        .GROUP_ID_CONFIG,
-                "myId");
-        map.put(ConsumerConfig
-                        .KEY_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class);
-        map.put(ConsumerConfig
-                        .VALUE_DESERIALIZER_CLASS_CONFIG,
-                JsonDeserializer.class);
+        map.put(ConsumerConfig.GROUP_ID_CONFIG, "myId");
+        map.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        map.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
         // return message in JSON formate
-        return new DefaultKafkaConsumerFactory<>(
+        /*return new DefaultKafkaConsumerFactory<>(
                 map, new StringDeserializer(),
-                new JsonDeserializer<>(PaymentToDo.class));
+                new JsonDeserializer<>(PaymentToDo.class));*/
+        return new DefaultKafkaConsumerFactory<>(map);
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String,PaymentToDo> paymentToDoListner()
+    public ConcurrentKafkaListenerContainerFactory<String,PaymentToDo> paymentToDoListener()
     {
-        ConcurrentKafkaListenerContainerFactory<String,
-                PaymentToDo>
-                factory
-                = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, PaymentToDo> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(paymentToDoConsumer());
         return factory;
     }
@@ -71,7 +58,7 @@ public class Config {
 
     // this is for producer
     @Bean
-    public ProducerFactory<String, PaymentToDoStatus> producerFactory() {
+    public ProducerFactory<String, Object> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -80,7 +67,7 @@ public class Config {
     }
 
     @Bean
-    public KafkaTemplate<String, PaymentToDoStatus> kafkaTemplate() {
+    public KafkaTemplate<String, Object> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 
