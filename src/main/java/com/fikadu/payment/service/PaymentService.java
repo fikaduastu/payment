@@ -4,14 +4,19 @@ import com.fikadu.payment.dto.PaymentToDo;
 import com.fikadu.payment.dto.PaymentToDoStatus;
 import com.fikadu.payment.entity.Payment;
 import com.fikadu.payment.repository.PaymentRepository;
+import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Charge;
 import com.stripe.model.Customer;
+import com.stripe.model.PaymentIntent;
 import com.stripe.model.Token;
+import com.stripe.param.ChargeCreateParams;
+import com.stripe.param.PaymentIntentCreateParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +34,17 @@ public class PaymentService {
     @Autowired
     Producer producer;
 
-    @Value("${stripe.key}")
-    String stripePublicKey;
+
+
+
+
+    @Value("${STRIPE_SECRET_KEY}")
+    private String secretKey;
+
+    @PostConstruct
+    public void init() {
+        Stripe.apiKey = secretKey;
+    }
 
 
 
@@ -52,6 +66,7 @@ public class PaymentService {
 
             Map<String,Object> customerParam = new HashMap<>();
             customerParam.put("email",email);
+            customerParam.put("payment_method", "pm_card_visa");
 
             Customer newCustomer = Customer.create(customerParam);
 
@@ -67,7 +82,12 @@ public class PaymentService {
 
             Map<String,Object> source = new HashMap<>();
             source.put("source",token.getId());
+            try{
             newCustomer.getSources().create(source);
+            }
+            catch (Exception e){
+
+            }
 
             makePayment(newCustomer,payment);
         }
@@ -75,12 +95,28 @@ public class PaymentService {
 
     public void makePayment(Customer customer,PaymentToDo payment) throws StripeException {
 
-        Map<String,Object> chargeParam = new HashMap<>();
-        chargeParam.put("amount",payment.getPaymentToMake().get("totalPrice"));
-        chargeParam.put("currency","usd");
-        chargeParam.put("customer",customer.getId());
-        Charge.create(chargeParam);
-        createPayment(payment);
+//        Map<String,Object> chargeParam = new HashMap<>();
+//        chargeParam.put("amount",payment.getPaymentToMake().get("totalPrice"));
+//        chargeParam.put("currency","usd");
+//        chargeParam.put("customer",customer.getId());
+//        Charge.create(chargeParam);
+//        createPayment(payment);
+
+        PaymentIntentCreateParams params =
+                PaymentIntentCreateParams.builder()
+                        .setAmount(100L)
+                        .setCurrency("usd")
+                        .addPaymentMethodType("card")
+                        .build();
+        PaymentIntent paymentIntent = PaymentIntent.create(params);
+
+//        ChargeCreateParams chargeParams =
+//                ChargeCreateParams.builder()
+//                        .setAmount(payment.getPaymentToMake().get("totalPrice"))
+//                        .setCurrency("usd")
+//                        .setCustomer(customer.getId())
+//                        .build();
+//        Charge charge = Charge.create(chargeParams);
     }
 
     public void createPayment(PaymentToDo paymentToDo){

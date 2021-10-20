@@ -1,10 +1,11 @@
 package com.fikadu.payment.service;
 
-import com.fikadu.payment.dto.Food;
-import com.fikadu.payment.dto.PaymentToDoStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
+//import com.fikadu.payment.dto.Food;
+//
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import com.fikadu.payment.dto.PaymentToDoStatus;
 
 
 @Service

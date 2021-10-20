@@ -15,7 +15,6 @@ import javax.persistence.Id;
 @NoArgsConstructor
 @Component
 public class Payment {
-
     @Id
     @GeneratedValue
     private Long id;
@@ -30,5 +29,4 @@ public class Payment {
     private String dasherEmail;
     private String paymentStatusOfUser;
     private String paymentStatusOfRD;
-
 }

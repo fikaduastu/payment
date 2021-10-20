@@ -1,7 +1,9 @@
 package com.fikadu.payment.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
+@AllArgsConstructor
 @Data
 public class Restaurant {
     private String id;
