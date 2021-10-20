@@ -136,6 +136,7 @@ public class PaymentService {
         );
 
         Charge charge = Charge.create(params1);
+        createPayment(payment);
 
 
     }
