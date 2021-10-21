@@ -3,6 +3,7 @@ package com.fikadu.payment.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fikadu.payment.dto.PaymentToDo;
+import com.fikadu.payment.restaurantDto.DriverInfoToPayment;
 import com.stripe.exception.StripeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -28,4 +29,19 @@ public class Consumer {
             e.printStackTrace();
         }
     }
+    @KafkaListener(topics = "payment",groupId = "myId")
+    public void consumeFromDasher(String payment) {
+        System.out.println(payment);
+        DriverInfoToPayment driverInfoToPayment = null;
+
+        try {
+            driverInfoToPayment = objectMapper.readValue(payment, DriverInfoToPayment.class);
+            paymentService.updateOrder(driverInfoToPayment);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
 }

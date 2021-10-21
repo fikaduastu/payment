@@ -1,26 +1,25 @@
 package com.fikadu.payment.service;
 
+import com.fikadu.payment.dto.Order;
+import com.fikadu.payment.dto.PaymentStatus;
 import com.fikadu.payment.dto.PaymentToDo;
 import com.fikadu.payment.dto.PaymentToDoStatus;
 import com.fikadu.payment.entity.Payment;
 import com.fikadu.payment.repository.PaymentRepository;
+import com.fikadu.payment.restaurantDto.DriverInfoToPayment;
+import com.fikadu.payment.restaurantDto.OrderToRestaurant;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Charge;
 import com.stripe.model.Customer;
-import com.stripe.model.PaymentIntent;
 import com.stripe.model.Token;
-import com.stripe.param.ChargeCreateParams;
-import com.stripe.param.PaymentIntentCreateParams;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class PaymentService {
@@ -28,6 +27,9 @@ public class PaymentService {
 
     @Autowired
     private PaymentRepository paymentRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Autowired
     Payment payment;
@@ -143,6 +145,9 @@ public class PaymentService {
     }
 
     public void createPayment(PaymentToDo paymentToDo){
+        Random rand = new Random();
+        long n = rand.nextLong();
+        paymentToDo.getOrder().setId(n);
 
         payment.setEmail(paymentToDo.getOrder().getUser().getEmail());
         payment.setTotalCost(paymentToDo.getPaymentToMake().get("totalPayment"));
@@ -153,17 +158,32 @@ public class PaymentService {
         payment.setUserName(paymentToDo.getOrder().getUser().getUserName());
         payment.setRestaurantEmail(paymentToDo.getOrder().getRestaurant().getEmail());
         payment.setDasherEmail(paymentToDo.getOrder().getDasher().getEmail());
-        payment.setPaymentStatusOfUser("PAID");
-        payment.setPaymentStatusOfRD("UNPAID");
+        payment.setPaymentStatusOfUser(PaymentStatus.PAID.name());
+        payment.setPaymentStatusOfRD(PaymentStatus.FAILED.name());
 
         paymentRepository.save(payment);
+        Order order = paymentToDo.getOrder();
 
         PaymentToDoStatus paymentToDoStatus = new PaymentToDoStatus();
         paymentToDoStatus.setPaymentToDo(paymentToDo);
-        paymentToDoStatus.setStatus(payment.getPaymentStatusOfUser());
+        if (payment.getPaymentStatusOfUser().equals("PAID")) {
+            paymentToDoStatus.setPaymentStatus(PaymentStatus.PAID);
+
+           OrderToRestaurant orderToRestaurant = modelMapper.map(order, OrderToRestaurant.class);
+            producer.publishRestaurant(orderToRestaurant);
+        }
+        else
+            paymentToDoStatus.setPaymentStatus(PaymentStatus.FAILED);
         producer.publishPayment(paymentToDoStatus);
 
-        // publish for gizachew as well
 
+    }
+
+    public void updateOrder(DriverInfoToPayment driverInfoToPayment) {
+        Payment payment =paymentRepository.findByOrderId(driverInfoToPayment.getOrderId());
+        payment.setOrderId(driverInfoToPayment.getOrderId());
+        payment.setDasherEmail(driverInfoToPayment.getDriver().getEmail());
+        payment.setPaymentStatusOfRD(PaymentStatus.PAID.name());
+        paymentRepository.save(payment);
     }
 }

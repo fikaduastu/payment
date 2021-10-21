@@ -7,6 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 
 import org.springframework.kafka.annotation.EnableKafka;
@@ -71,4 +72,8 @@ public class Config {
         return new KafkaTemplate<>(producerFactory());
     }
 
+    @Bean
+    public ModelMapper modelMapper(){
+        return new ModelMapper();
+    }
 }

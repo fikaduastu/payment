@@ -6,5 +6,5 @@ import lombok.Data;
 public class PaymentToDoStatus {
 
     private PaymentToDo paymentToDo;
-    private String status;
+    private PaymentStatus paymentStatus;
 }

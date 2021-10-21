@@ -1,7 +1,6 @@
 package com.fikadu.payment.service;
 
-import com.fikadu.payment.dto.Food;
-
+import com.fikadu.payment.restaurantDto.OrderToRestaurant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -17,12 +16,17 @@ public class Producer {
 
 
 
+    private static final String RESTAURANT_TOPIC = "toRestaurant";
     private static final String TOPIC = "paymentStatus";
 
     public void publishPayment(PaymentToDoStatus paymentToDoStatus){
 
         kafkaTemplateForPayment.send(TOPIC,paymentToDoStatus);
 
+    }
+
+    public void publishRestaurant(OrderToRestaurant orderToRestaurant){
+        kafkaTemplateForPayment.send(RESTAURANT_TOPIC, orderToRestaurant);
     }
 
 
