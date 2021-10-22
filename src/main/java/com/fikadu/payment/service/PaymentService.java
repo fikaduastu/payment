@@ -186,4 +186,12 @@ public class PaymentService {
         payment.setPaymentStatusOfRD(PaymentStatus.PAID.name());
         paymentRepository.save(payment);
     }
+
+    public void cancelOrder(DriverInfoToPayment canceledObeject) {
+        Payment payment =paymentRepository.findByOrderId(canceledObeject.getOrderId());
+        payment.setPaymentStatusOfRD(PaymentStatus.CANCELED.name());
+        payment.setPaymentStatusOfUser(PaymentStatus.CANCELED.name());
+        paymentRepository.save(payment);
+
+    }
 }

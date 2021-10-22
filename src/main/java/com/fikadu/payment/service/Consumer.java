@@ -31,7 +31,7 @@ public class Consumer {
     }
     @KafkaListener(topics = "payment",groupId = "myId")
     public void consumeFromDasher(String payment) {
-        System.out.println(payment);
+        //System.out.println(payment);
         DriverInfoToPayment driverInfoToPayment = null;
 
         try {
@@ -42,6 +42,17 @@ public class Consumer {
         }
 
 
+    }
+    @KafkaListener(topics = "paymentCancel",groupId = "myId")
+    public void consumeCancelOrder(String cancelOrder){
+        DriverInfoToPayment canceledObeject = null;
+        try{
+            canceledObeject = objectMapper.readValue(cancelOrder,DriverInfoToPayment.class);
+            paymentService.cancelOrder(canceledObeject);
+        }
+        catch (JsonProcessingException e){
+            e.printStackTrace();
+        }
     }
 
 }
